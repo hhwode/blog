@@ -9,8 +9,13 @@ tags:
 引用方式：
 ![alt text][id] 
 
-[id]: /images/timg.jpg "Title"
-
 ```bash
 git clone **.git
+```
+
+```bash
+学习能力和管理自己才是安身立命之本
+1、目标
+2、方法
+3、行动
 ```
