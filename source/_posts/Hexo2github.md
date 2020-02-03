@@ -69,4 +69,10 @@ $ hexo new post "博客名"
 $ hexo g -d
 ```
 
+### 7、Something
+
+![初始化hexo后文件列表](/images/hexo2github/source.png "初始化hexo后文件列表")
+![文档列表，一个文件一个文档](/images/hexo2github/blog.png "文档列表，一个文件一个文档")
+![每个文档使用Markdown语法编写](/images/hexo2github/context.png "每个文档使用Markdown语法编写")
+
 More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)
