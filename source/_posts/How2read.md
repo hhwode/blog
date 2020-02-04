@@ -4,7 +4,7 @@ date: 2020-02-04 11:05:24
 tags: introduce
 category: article
 ---
-S. Keshav于2016年2月17日的版本【How to Read a Paper】，很多东西都是论文中开源而来，读论文势在必行。
+S. Keshav<滑铁卢大学大卫·切瑞顿计算机科学学院，加拿大安大略省滑铁卢市，keshav@uwaterloo.ca >，于2016年2月17日的版本【How to Read a Paper】，很多东西都是论文中开源而来，读论文势在必行。
 
 # 1、Abstract
 本身作为一个研究者，都会花费很多时间在阅读论文上，但阅读论文的技巧很难教，也就到这很多努力白费，作者从经验中得出three-pass方法。
@@ -59,4 +59,4 @@ S. Keshav于2016年2月17日的版本【How to Read a Paper】，很多东西都
 # 7、References
 论文引用的是一些如何写论文，读和写都是相辅相成的，链接不就放了，直接看该篇论文
 
-More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)
+More info: [Deployment](https://hexo.io/docs/one-command-deployment.html)      网上一篇更详细的[翻译](https://www.cnblogs.com/zhouqing/articles/3336425.html)
