@@ -1,8 +1,8 @@
 ---
 title: Horovod fast and easy distributed deep learning in TensorFlow
-date: 2020-02-05 20:44:24
-tags: introduce
-category: DeepLearning, distributed training
+date: 2020-02-05 12:44:24
+tags: [deepLearning,distributedTraining]
+category: introduce
 ---
 业务导向，最近在看深度学习分布式训练框架内容，虽然每类深度学习框架都提供了分布式训练的接口，但总有利弊，所有才会有其他分布式深度学习框架。本文是对论文【Horovod: fast and easy distributed deep learning in TensorFlow】的了解。
 

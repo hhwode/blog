@@ -1,8 +1,8 @@
 ---
 title: Using Hexo to deploy blog
 date: 2020-02-03 20:44:24
-tags: introduce
-category: web
+tags: web
+category: introduce
 keywords: hexo, github, nodejs
 ---
 一直想在GitHub中搭建自己的博客，可是始终未清楚需要什么，现在看很多博客的模板，直接借鉴过来使用。
