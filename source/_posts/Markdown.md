@@ -6,7 +6,8 @@ category: introduce
 ---
 
 # #概念
-为什么会有Markdown语言，
+为什么会有Markdown语言，Markdown就是简化阉割过的HTML，优点是语法简单高效，缺点就是HTML中一些稍微高级复杂一点的效果，比如文本居中，Markdown就无法实现，所以Markdown一般被用来写对页面排版要求不高，以文字为主的笔记和文档
+
 ## 什么是Markdown
 Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档。
 Markdown 语言在 2004 由约翰·格鲁伯（英语：John Gruber）创建。
@@ -18,7 +19,9 @@ Markdown 能被使用来撰写电子书，如：Gitbook。
 当前许多网站都广泛使用 Markdown 来撰写帮助文档或是用于论坛上发表消息。例如：GitHub、简书、reddit、Diaspora、Stack Exchange、OpenStreetMap 、SourceForge等。【**用于写其他博客很有用，而且开源的项目多数使用Markdown进行介绍**】
 
 常使用的工具是[Typora 编辑器](https://typora.io/)，Typora 支持 MacOS 、Windows、Linux 平台，且包含多种主题，编辑后直接渲染出效果。支持导出HTML、PDF、Word、图片等多种类型文件。
+
 ## 如何解析
+···
 
 # #语法
 
@@ -268,5 +271,7 @@ Markdown 区块引用是在段落开头使用 **>** 符号 ，然后后面紧跟
 3. 公式
 
    当你需要在编辑器中插入数学公式时，可以使用两个美元符 $$ 包裹 TeX 或 LaTeX 格式的数学公式来实现。提交后，问答和文章页会根据需要加载 Mathjax 对数学公式进行渲染。
+
+4. 字体颜色如何设置，只能使用html标签吗
 
 参考：[Markdown 教程](https://www.runoob.com/markdown/md-tutorial.html)
