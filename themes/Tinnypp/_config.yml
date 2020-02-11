@@ -116,7 +116,7 @@ google_cse:
 
 ####swift_search
 swift_search:
-  enable: true
+  enable: false
 ##Firstly,you should set in: https://swiftype.com
 ##There are some steps in: http://www.jerryfu.net/post/search-engine-for-hexo-with-swiftype.html
 
