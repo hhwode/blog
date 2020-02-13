@@ -101,7 +101,7 @@ with open(os.path.join(logdir, 'timeline.json'), 'a+') as f:
 一般只取一个epoch情况，不需要合并多个epoch情况
 # horovod使用timeline
 Horovod也封装了Timeline，只需指定Timeline输出文件位置即可，比TensorFlow、Keras简单，不用嵌入代码。
-使用mpirun命令跑timeline
+使用mpirun命令跑timeline，[官网链接](https://github.com/horovod/horovod/blob/master/docs/mpirun.rst)
 ```
 $ HOROVOD_TIMELINE=/path/to/timeline.json mpirun -np 4 -x HOROVOD_TIMELINE python train.py
 ```
