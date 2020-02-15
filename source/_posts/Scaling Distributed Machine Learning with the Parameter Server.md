@@ -1,5 +1,5 @@
 ---
-title: Scaling Distributed Machine Learning with the Parameter Server.md
+title: Scaling Distributed Machine Learning with the Parameter Server
 date: 2020-02-12 20:44:24
 tags: introduce
 category: [deeplearning,distributedTraining]

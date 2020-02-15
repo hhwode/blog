@@ -112,3 +112,28 @@ $ horovodrun -np 4 --timeline-filename /path/to/timeline.json python train.py
 ```
 只是一个工具的初步认识，深入分析需要实验相结合。
 未知Horovod跑pytorch、mxnet是否也可以用该Timeline工具
+
+## horovod timeline
+horovod封装的timeline与TensorFlow原生不同，只关注网络每一层broadcast和reduce消耗时间
+其tensor进行reduce主要涉及两个阶段：
+1. **Negotiation**-可以认为是初始化阶段，涉及部分如下：
+ - 在**NEGOTIATE_ALLREDUCE**条下有标识每个worker号，因此可以看出每个worker开始时间，所有的worker发信号给worker 0，通知worker0他们准备好进行broadcast和reduce操作
+ ![](/images/timeline/4 "worker id")
+ - 之后worker0 发信号给其他worker开始工作
+2. **Processing**-可以认为是主要通信阶段，涉及部分如下
+ 实际发生通信操作的阶段，并且高亮来强调使用纯MPI接口的操作，如MPI_Broadcast() and MPI_Allreduce()
+ - WAIT_FOR_DATA：只有在GPU执行才有，表示等待GPU完成allreduce、allgather或broadcast操作的计算输入所花费的时间
+ - WAIT_FOR_OTHER_TENSOR_DATA：表示等待GPU为同一融合批处理中的其他操作完成其他输入计算所花费的时间
+ - QUEUE：前面NCCL操作还未完成，要对当前操作进行reduce时发生
+ - MEMCPY_IN_FUSION_BUFFER：将数据拷贝到fusion buffer的耗时
+ - MEMCPY_OUT_FUSION_BUFFER：从fusion buffer拷贝数据的耗时
+ - NCCL_ALLREDUCE：表示在GPU(或CPU)上执行实际操作所花费的时间，并突出显示该操作是使用NCCL还是纯MPI执行的
+ - MPI_ALLREDUCE：同上
+ - MPI_ALLGATHER：同上
+ - MPI_BCAST：同上
+ - 在HOROVOD_HIERARCHICAL_ALLREDUCE=1情况下：NCCL_ALLREDUCE将会分解成NCCL_REDUCESCATTER, NCCL_REDUCE, MEMCPY_IN_HOST_BUFFER, MPI_ALLREDUCE, MEMCPY_OUT_HOST_BUFFER, NCCL_ALLGATHER, NCCL_BCAST
+
+简单的一个mnist数据集跑的timeline结果，基于CPU运行；
+![](/images/timeline/5.png "")
+
+

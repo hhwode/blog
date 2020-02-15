@@ -2,10 +2,11 @@
 title: mxnet
 date: 2020-02-13 20:44:24
 tags: introduce
-category: deeplearning
+category: [deeplearning,framework]
 ---
 
-> 1、mxnet介绍
+# 概念
+- **1、mxnet介绍**
  DMLC社区开源的深度学习框架，也是Apache的孵化项目
  特点：
  1. 接口清晰，易用
@@ -14,7 +15,7 @@ category: deeplearning
  4. 支持多语言python、R、matlab、JavaScript等
  5. 具有静态图编程接口mxnet和动态图编程接口Gluon
 
-> 2、一个模型训练模块：
+- **2、一个模型训练模块：**
  1. 读取数据、数据处理
  2. 定义网络结构
  3. 定义优化器
@@ -23,7 +24,7 @@ category: deeplearning
  6. 执行网络，从网络获取节点值
  7. 其他能监控网络执行过程的模块，性能分析工具
  
-> 3、mxnet核心接口
+- **3、mxnet核心接口**
  1. Context： 指定运行设备，CPU，GPU
   - mxnet.cpu(0) 类似TensorFlow的 tf.device('/cpu:0')
   - mxnet.gpu(0) 类似TensorFlow的 tf.device('/gpu:0')
@@ -66,10 +67,14 @@ category: deeplearning
  10. KVStore：跨设备的键值存储
  11. Module： 将前面所有的定义组合成一个模块使用
  
-> 4、网络可视化
-> 5、保存于恢复模型
+- **4、网络可视化**
+- **5、保存于恢复模型**
  1. mx.callback.do_checkpoint()
  2. mx.model.load_checkpoint()
-> 6、显存优化：[memonger](https://github.com/dmlc/mxnet-memonger)
-> 7、部署：tvm、nnvm，C++或python 
+- **6、显存优化**：[memonger](https://github.com/dmlc/mxnet-memonger)
+- **7、部署**：tvm、nnvm，C++或python 
+
+# Gluon
+
+# 分布式
  
