@@ -58,7 +58,11 @@ category: deeplearning
 	```
 
 - **5、安装horovod**
+```
     pip3 install --ignore-installed horovod -i http://mirrors.aliyun.com/pypi/simple  --trusted-host mirrors.aliyun.com
+	or
+	pip3 install --ignore-installed horovod -i https://pypi.tuna.tsinghua.edu.cn/simple/
+```
 	
 	HOROVOD_MPICXX_SHOW=$(/usr/local/openmpi/bin/mpicxx -show) pip3 install dist/horovod-0.19.0.tar.gz
 	

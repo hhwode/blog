@@ -1,6 +1,6 @@
 ---
 title: mxnet
-date: 2020-02-13 20:44:24
+date: 2020-02-18 20:44:24
 tags: introduce
 category: [deeplearning,framework]
 ---
@@ -74,7 +74,203 @@ category: [deeplearning,framework]
 - **6、显存优化**：[memonger](https://github.com/dmlc/mxnet-memonger)
 - **7、部署**：tvm、nnvm，C++或python 
 
+# 常用API
+
+## gpu()
+
+## cpu()
+
+## symbol()
+符号式编程，通过mx.symbol来进行调用网络模块，可以定义：
+1. mx.symbol.Variable:类似tf.placeholder功能，作为一个占位符
+2. mx.symbol.Convolution
+3. mx.symbol.Activation
+4. mx.symbol.BatchNorm
+
+## Context()
+通过输入设备不同来建立设备，mx.Context('gpu')，其实等价于：
+1. mx.Context('gpu') == mx.gpu()
+2. mx.Context('cpu') == mx.cpu()
+
+## ctx()
+
+## Symbols()
+
+## AttrScope()
+
+```
+def test_ctx_group():
+    with mx.AttrScope(ctx_group='stage1'):
+        data = mx.symbol.Variable('data')
+        fc1  = mx.symbol.FullyConnected(data = data, name='fc1', num_hidden=128)
+        act1 = mx.symbol.Activation(data = fc1, name='relu1', act_type="relu")
+
+    set_stage1 = set(act1.list_arguments())
+    print(list(act1.list_arguments()))
+    with mx.AttrScope(ctx_group='stage2'):
+        fc2  = mx.symbol.FullyConnected(data = act1, name = 'fc2', num_hidden = 64)
+        act2 = mx.symbol.Activation(data = fc2, name='relu2', act_type="relu")
+        fc3  = mx.symbol.FullyConnected(data = act2, name='fc3', num_hidden=10)
+        fc3 = mx.symbol.BatchNorm(fc3)
+        mlp  = mx.symbol.SoftmaxOutput(data = fc3, name = 'softmax')
+
+    set_stage2 = set(mlp.list_arguments()) - set_stage1
+    print(list(mlp.list_arguments()))
+    print('set_stage2', set_stage2)
+    group2ctx = {
+        'stage1' : mx.cpu(0),
+        'stage2' : mx.gpu(0)
+    }
+    texec = mlp.simple_bind(mx.cpu(0),
+                            group2ctx=group2ctx,
+                            data=(1,200))
+
+    for arr, name in zip(texec.arg_arrays, mlp.list_arguments()):
+        if name in set_stage1:
+            assert arr.context == group2ctx['stage1']
+            print('stage1', arr)
+        else:
+            assert arr.context == group2ctx['stage2']
+            print('stage2', arr)
+```
+
+## 建立一个网络
+以线性回归网络为例，其就是一个单层网络
+### mxnet定义
+1. 定义输入，明确特征与标签，形状，数量
+```
+num_inputs = 2
+num_examples = 1000
+true_w=[2, -3.4]
+true_b=4.2
+features = nd.random.normal(scale=1, shape=(num_examples, num_inputs))
+labels = true_w[0]*features[:,0]+true_w[1]*features[:,1]+true_b
+# noise
+labels += nd.random.normal(scale=1, shape=labels.shape)
+```
+2. 构建迭代器
+```
+def data_iter(batch_size, features, labels):
+    num_examples = len(features)
+    indices = list(range(num_examples))
+    random.shuffle(indices)
+    for i in range(0,num_examples,batch_size):
+        j = nd.array(indices[i:min(i+batch_size,num_examples)])
+        yield features.take(j), labels.take(j)
+```
+
+3. 建网络
+```
+w = nd.random.normal(scale=0.01, shape=(num_inputs, 1))
+b=nd.zeros(shape=(1,))
+# create gradient
+w.attach_grad()
+b.attach_grad()
+# 网络定义
+def linreg(x, w, b):
+    return nd.dot(x,w)+b
+# 损失函数定义
+def square_loss(y_hat, y):
+    return (y_hat - y.reshape(y_hat.shape))**2/2
+# 优化器定义
+def sgd(params, lr, batch_size):
+    for param in params:
+        param[:]=param -lr*param.grad / batch_size
+```
+4. 构建执行流程
+```
+lr = 0.03
+num_epochs=3
+net=linreg
+loss = square_loss
+for epoch in range(num_epochs):
+    for x,y in data_iter(batch_size, features, labels):
+        with autograd.record():
+		    # 计算当前batch的损失值，用于反向传播
+            l = loss(net(x,w,b), y)
+		# 损失值或误差反向传播，方法嵌入在mxnet中，直接调用，相当于nd.sum(loss).backward()
+        l.backward()
+		# 优化参数
+        sgd([w,b],lr,batch_size)
+    train_l = loss(net(features,w,b),labels)
+    print('epoch %d, loss %f' %(epoch+1, train_l.mean().asnumpy()))
+```
+5. 问题
+	- 建立网络时，定义loss值为什么要y.reshape(y_hat.shape)：有可能网络预测出来的值与输入y形状不同，依赖网络定义。
+	- 如果样本个数不能被batch整除，有啥影响：最后一个batch size值就会不够
+
+### gluon定义
+gluon实现由自己的输入类型
+1. 定义输入，明确特征与标签，形状，数量
+```
+num_inputs = 2
+num_examples = 1000
+true_w=[2, -3.4]
+true_b=4.2
+features = nd.random.normal(scale=1, shape=(num_examples, num_inputs))
+labels = true_w[0]*features[:,0]+true_w[1]*features[:,1]+true_b
+# noise
+labels += nd.random.normal(scale=1, shape=labels.shape)
+```
+2. 转换数据，创建迭代器
+```
+# gluon
+from mxnet.gluon import data as gdata
+batch_size = 10
+dataset = gdata.ArrayDataset(features, labels)
+train_iter = gdata.DataLoader(dataset, batch_size, shuffle=True)
+```
+3. 定义网络
+```
+# 1. 定义网络
+from mxnet.gluon import nn
+net = nn.Sequential()
+# 输出1个值
+net.add(nn.Dense(1))
+# 2. 初始化网络参数
+from mxnet import init
+net.initialize(init.Normal(sigma=0.01))
+# 3. 定义损失函数
+from mxnet.gluon import loss as gloss
+loss = gloss.L2Loss()
+# 定义优化器，使用什么优化算法
+from mxnet import gluon
+trainer = gluon.Trainer(net.collect_params(), 'sgd', {'learning_rate':0.03})
+```
+4. 构建执行流程
+```
+num_epochs = 3
+for epoch in range(num_epochs):
+    for x,y in train_iter:
+	    # 
+        with autograd.record():
+		    # 计算batch下网络损失值
+            l = loss(net(x), y)
+		# 反向传播，相当于nd.sum(loss).backward()
+        l.backward()
+		# 优化参数值，将前面batch size的loss进行归一化，trainer.step(batch_size)相当于除以batch size
+        trainer.step(batch_size)
+    l = loss(net(features), labels)
+    print('epoch %d, loss %.4f' %(epoch+1, l.mean().asnumpy()))
+```
+可通过`net[0].weight.data()`，`net[0].bias.data()`来查看第0层的权值与偏差，`net[0].weight.grad()`来查看权值梯度值
+5. 问题
+	- 如果将 l = loss(net(X), y) 替换成 l = loss(net(X), y).mean()，我们需要将 trainer.step(batch_size) 相应地改成 trainer.step(1)。这是为什么呢：因为mean已经对loss进行了平均，而trainer.step(batch_size)作用在优化参数时会除以batch_size来做平均
 # Gluon
 
 # 分布式
- 
+
+# Question
+
+1. 问题描述
+```
+Traceback (most recent call last):
+  File "test_mxnet_model_parallel_02.py", line 37, in <module>
+    test_ctx_group(kv)
+  File "test_mxnet_model_parallel_02.py", line 27, in test_ctx_group
+    data=(1,200))
+  File "/usr/local/python3.6/lib/python3.6/site-packages/mxnet/symbol/symbol.py", line 1541, in simple_bind
+    ctx_map_dev_types.append(val.device_typeid)
+AttributeError: 'list' object has no attribute 'device_typeid' 
+```
+解答：bind doesn't support multi-gpu. Use mx.mod.Module instead，代码用了simple_bind

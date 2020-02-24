@@ -38,30 +38,29 @@ MXNet中有三种进程类型，这些进程之间相互通信，完成模型的
 分布式训练关键部分，Servers将参数存储为K-V形式，以便Workers向Servers进行push/pull操作。
 需要指定给训练器，
 	1. MXNet情况如下，只有Module才有分布式参数kvstore：
-	```
+```
 	mod = mx.mod.Module(mlp)  # mlp是最后分类层
 	mod.bind(data_shapes=train_iter.provide_data,
 			 label_shapes=train_iter.provide_label)
 	mod.init_params()
 	kv = mx.kvstore.create('dist_sync')
 	mod.fit(train_iter, eval_data=val_iter,optimizer_params={'learning_rate':0.01, 'momentum': 0.9},num_epoch=2, kvstore=kv)
-	```
+```
 	或者：
-	```
+```
 	mod.fit(train_iter, eval_data=val_iter,optimizer_params={'learning_rate':0.01, 'momentum': 0.9},num_epoch=2, kvstore="dist_sync")
-	```
-
+```
 	2. gluon情况下：
-	```
+```python
 	trainer = gluon.Trainer(net.collect_params(),'sgd',{'learning_rate' : lr},kvstore='dist_sync')
-	```
-	   
+```
+
 	或者如下，可以用kv.rank知道哪个worker
 
-	```
+```python
 	kv = mx.kvstore.create('dist_sync')
 	trainer = gluon.Trainer(net.collect_params(),'sgd',{'learning_rate' : lr}, kvstore=kv)
-	```
+```
 
 ### 2.2.3 Keys的分配
 每个Server不一定存储所有的key或全部的参数数组。 参数分布在不同的Server上。 哪个Server存储特定的keys是随机决定的。 KVStore透明地处理不同服务器上的keys分配。 它确保当一个keys被拉取时，该请求被发送到的服务器具有对应value。 如果某个keys的值非常大，则可能会在不同的服务器上分片。这意味着不同的服务器拥有不同部分的value。
@@ -85,15 +84,15 @@ MXNet提供了一个执行分布式训练的脚本，该工具是在mxnet安装�
 MXNet提供了一个脚本工具/ launch.py，以便于开展分布式训练工作。这支持各种类型的集群资源管理器，如ssh，mpirun，yarn和sge。launch.py工具只是针对服务器级别为Worker，因为其只起了一个进程，如果要起多个进程，如何指定一个进程对应一个GPU，比较难设置。
 比如在单机上运行脚本：
 ```
-#python image_classification.py --dataset cifar10 --model vgg11 --num-epochs 1
+	#python image_classification.py --dataset cifar10 --model vgg11 --num-epochs 1
 ```
 此示例的分布式训练，可执行以下操作： 如果包含脚本image_classification.py的mxnet目录可供集群中的所有计算机访问（例如，如果它们位于网络文件系统上），则可以运行：
 ```
-#../../tools/launch.py -n 3 -H hosts --launcher ssh python3 mnist.py --kvstore dist_sync
+	#../../tools/launch.py -n 3 -H hosts --launcher ssh python3 mnist.py --kvstore dist_sync
 ```
 如果包含脚本的目录不能从集群中的其他机器访问，那么我们可以将当前目录同步到所有机器。
 ```
-#../../tools/launch.py -n 3 -H hosts --launcher ssh --sync-dst-dir /tmp/mxnet_job/ python3 mnist.py --kvstore dist_sync
+	#../../tools/launch.py -n 3 -H hosts --launcher ssh --sync-dst-dir /tmp/mxnet_job/ python3 mnist.py --kvstore dist_sync
 ```
 launch.py提交分布式训练工具参数：
 	**-n** 表示要启动的worker节点的数量。
@@ -117,15 +116,15 @@ MXNet使用环境变量将不同的角色分配给不同的进程，并让不同
 
 启动方式，比如启动1个scheduler，2个server，2个worker：
 ```
-#DMLC_ROLE=scheduler DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
+	#DMLC_ROLE=scheduler DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
 
-#DMLC_ROLE=server DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
+	#DMLC_ROLE=server DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
 
-#DMLC_ROLE=server DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
+	#DMLC_ROLE=server DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
 
-#DMLC_ROLE=worker DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
+	#DMLC_ROLE=worker DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
 
-#DMLC_ROLE=worker DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
+	#DMLC_ROLE=worker DMLC_PS_ROOT_URI=127.0.0.1 DMLC_PS_ROOT_PORT=9092 DMLC_NUM_SERVER=2 DMLC_NUM_WORKER=2 python3 mnist.py --kv-store dist_sync
 ```
 ## 2.4 实用工具
 ### 2.4.1 其他环境变量使用
@@ -143,19 +142,19 @@ MXNet使用环境变量将不同的角色分配给不同的进程，并让不同
 代码指定的方式，可自定义统计部分，文件容量相对较少。
 创建profile配置
 ```
-from mxnet import profiler
-profiler.set_config(profile_all=True,
-               aggregate_stats=True,
-               continuous_dump=True,
-               filename='profile_output.json')
+	from mxnet import profiler
+	profiler.set_config(profile_all=True,
+				   aggregate_stats=True,
+				   continuous_dump=True,
+				   filename='profile_output.json')
 ```
 指定统计范围
 ```
-profiler.set_state('run') # 开始统计
-run_training_iteration(*next(itr)) # 训练
-mx.nd.waitall() 
-profiler.set_state('stop') # 结束统计
-profiler.dump()
+	profiler.set_state('run') # 开始统计
+	run_training_iteration(*next(itr)) # 训练
+	mx.nd.waitall() 
+	profiler.set_state('stop') # 结束统计
+	profiler.dump()
 ```
 
 # 3 优化
@@ -163,13 +162,13 @@ MKL
 
 
 **Reference**
-[1] https://mxnet.incubator.apache.org/api/faq/multi_device
-[2] Scaling Distributed Machine Learning with the Parameter Server
-[3] https://www.cnblogs.com/heguanyou/p/7868596.html
-[4] https://ps-lite.readthedocs.io/en/latest/how_to.html
-[5] https://mxnet.incubator.apache.org/api/faq/gradient_compression
-[6] https://mxnet.incubator.apache.org/api/faq/env_var
-[7] https://mxnet.apache.org/api/python/docs/tutorials/performance/backend/profiler.html
+	[1] https://mxnet.incubator.apache.org/api/faq/multi_device
+	[2] Scaling Distributed Machine Learning with the Parameter Server
+	[3] https://www.cnblogs.com/heguanyou/p/7868596.html
+	[4] https://ps-lite.readthedocs.io/en/latest/how_to.html
+	[5] https://mxnet.incubator.apache.org/api/faq/gradient_compression
+	[6] https://mxnet.incubator.apache.org/api/faq/env_var
+	[7] https://mxnet.apache.org/api/python/docs/tutorials/performance/backend/profiler.html
 
 **附录**：
 一、MXNet建立模型
@@ -177,22 +176,22 @@ MXnet中定义好symbol、写好dataiter并且准备好data之后，就可以开
 1. **使用Model构建模型**
 从官方文档里面拿出来的代码看一下（Model形式不能用于分布式训练，没找到kvstore参数接口）：
 ```
-# 1、configure a two layer neural network
-    data = mx.symbol.Variable('data')
-    fc1 = mx.symbol.FullyConnected(data, name='fc1', num_hidden=128)
-    act1 = mx.symbol.Activation(fc1, name='relu1', act_type='relu')
-    fc2 = mx.symbol.FullyConnected(act1, name='fc2', num_hidden=64)
-    softmax = mx.symbol.SoftmaxOutput(fc2, name='sm')
-# 2、create a model using sklearn-style two-step way
-#创建一个model
-   model = mx.model.FeedForward(
-         softmax,
-         num_epoch=num_epoch,
-         learning_rate=0.01)
-#开始训练
-    model.fit(X=data_set)
+	# 1、configure a two layer neural network
+		data = mx.symbol.Variable('data')
+		fc1 = mx.symbol.FullyConnected(data, name='fc1', num_hidden=128)
+		act1 = mx.symbol.Activation(fc1, name='relu1', act_type='relu')
+		fc2 = mx.symbol.FullyConnected(act1, name='fc2', num_hidden=64)
+		softmax = mx.symbol.SoftmaxOutput(fc2, name='sm')
+	# 2、create a model using sklearn-style two-step way
+	#创建一个model
+	   model = mx.model.FeedForward(
+			 softmax,
+			 num_epoch=num_epoch,
+			 learning_rate=0.01)
+	#开始训练
+		model.fit(X=data_set)
 ```
-具体的API参照http://mxnet.io/api/python/model.html。Model形式可定制化不强，不常用，一般用Module构建模型。
+具体的API参照[官网Model介绍](http://mxnet.io/api/python/model.html)。Model形式可定制化不强，不常用，一般用Module构建模型。
 2. **使用Module构建模型**
 Module有四种状态：
 	1. 初始化状态，就是显存还没有被分配，基本上啥都没做的状态。

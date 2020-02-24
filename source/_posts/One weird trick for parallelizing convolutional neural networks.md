@@ -4,7 +4,7 @@ date: 2020-02-09 20:44:24
 tags: introduce
 category: [deeplearning,distributedTraining]
 ---
-该论文是2019年6月25日google发表的一篇文章，作者为Alex Krizhevsky大牛
+该论文是2014年google发表的一篇文章，作者为Alex Krizhevsky大牛
 
 # Three pass
 明确研究背景，

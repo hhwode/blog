@@ -61,7 +61,7 @@ horovod提供的timeline分析工具，是TensorFlow自带的一个封装，可�
 2、Tensorflow: Large-scale machine learning on heterogeneous distributed systems, 2016, arXiv:1603.04467
 3、Tensorflow: A system for large-scale machine learning, 2016, arXiv:1605.08695
 4、Bandwidth optimal all-reduce algorithms for clusters of workstations. J.Parallel Distrib. Comput., 69:117–124, 2009
-5、![Bringing HPC Techniques to Deep Learning](http://www.gibiansky.com/)
+5、[Bringing HPC Techniques to Deep Learning](http://www.gibiansky.com/)
 
 ## The third pass
 【1】论文的假设：当能极力优化通信时间，GPU数量增加与集群计算能力成线性增长
