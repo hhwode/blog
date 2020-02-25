@@ -10,6 +10,8 @@ category: [deeplearning,distributedTraining]
 
 刚开源出来的框架
 
+减少训练时模型在GPU的占用，来达到处理更大规模的模型
+
 # 介绍
 DeepSpeed
 DeepSpeed封装自Pytorch
