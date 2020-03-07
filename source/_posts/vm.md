@@ -56,3 +56,21 @@ HOSTNAME=master
 查看服务是否开机启动：systemctl is-enabled firewalld.service;echo $?
 查看已启动的服务列表：systemctl list-unit-files|grep enabled
 
+# linux清理缓存
+`free -m`查看内存使用情况，sysctl 命令可以临时改变某个系统参数  如：sysctl -w net.ipv4.ip_forward=1 是将forware参数临时改为1 当 service network restart后 失效.
+清理步骤：
+1. `sync`：因为系统在操作的过程当中，会把你的操作到的文件资料先保存到buffer中去，因为怕你在操作的过程中因为断电等原因遗失数据，所以在你操作过程中会把文件资料先缓存。所以我们在清理缓存先要先把buffe中的数据先写入到硬盘中，sync命令
+2. `echo {num}`：echo 3 是清理所有缓存；echo 0 是不释放缓存；echo 1 是释放页缓存；ehco 2 是释放dentries和inodes缓存；echo 3 是释放 1 和 2 中说道的的所有缓存
+```
+# sync
+# echo 3 > /proc/sys/vm/drop_caches
+```
+3. Linux清除ARP缓存
+一、 `arp -n|awk '/^[1-9]/ {print "arp -d "$1}' | sh`
+清除所有ARP缓存，推荐！
+二、`for((ip=2;ip<255;ip++));do arp -d 192.168.0.$ip &>/dev/null;done`
+清除192.168.0.0网段的所有缓存
+三、`arp -d IP`
+这样可以清除单一IP 的ARP缓存
+注意：以上均需要root权限，尤其是最后一个，如果不再root下执行，则改为：
+`arp -n|awk '/^[1-9]/ {print "arp -d "$1}' | sudo sh`
